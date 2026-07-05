@@ -1,0 +1,35 @@
+==============================================================================
+PLANT IDENTIFICATION FROM STEP-RESPONSE DATA (scipy curve_fit)
+==============================================================================
+Dataset: 2250 samples at Ts = 10 ms, Vbus = 5.00 V, source = synthetic
+
+--- Candidate 1: first order + dead time ---
+  G(s) = K e^(-theta s) / (tau s + 1)
+  K     =   83.68  +/- 0.10   rad/s per V
+  tau   =   254.0  +/- 3.1   ms
+  theta =     9.0  +/- 2.2   ms
+  fit   =  90.73 %   RMSE = 12.91 rad/s
+
+--- Candidate 2: second order + dead time ---
+  G(s) = K e^(-theta s) / ((tau1 s + 1)(tau2 s + 1))
+  K     =   83.68  +/- 0.10   rad/s per V
+  tau1  =   254.0  +/- 3.2   ms
+  tau2  =    0.10  +/- 6.70   ms
+  theta =     8.9  +/- 6.3   ms
+  fit   =  90.73 %   RMSE = 12.91 rad/s
+
+--- Model selection ---
+Second pole buys -0.00 fit points (threshold to justify it: 1.00).
+=> FIRST-ORDER model selected on parsimony.
+   Physics says a second (electrical, ~L/R) pole exists, but at
+   Ts = 10 ms it is far inside one sample: the data cannot
+   support it (note tau2's error bar), and its lag is already
+   captured inside the fitted dead time. Designing on the FO
+   model with theta treated as phase loss at crossover is both
+   honest and conservative.
+
+Residual sanity: the residual trace (fit_overlay.png, bottom) is
+quantization + edge jitter around zero at cruise, with structured
+bumps only at the low-voltage steps -- that is Coulomb friction /
+stiction, a real nonlinearity a linear model cannot (and need not)
+capture. The PI integrator will absorb it in closed loop.
