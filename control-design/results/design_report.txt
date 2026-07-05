@@ -1,0 +1,51 @@
+==============================================================================
+PI SPEED-CONTROLLER DESIGN FROM IDENTIFIED PLANT
+(target fc = 2.5 Hz, PM >= 60 deg)
+==============================================================================
+Plant (FO model, fit 90.7%, source: synthetic):
+  K = 83.68 rad/s per V, tau = 254.0 ms, theta = 9.0 ms
+  open-loop pole: 0.63 Hz;  measurement LPF: 15 Hz;
+  Ts = 10 ms, Vbus = 5.00 V (Project 1 buck output), CPR = 48
+
+Uncompensated P·H at fc:
+  |PH(j2pi fc)| = 20.071 (rad/s)/V,  phase = -93.5 deg
+  phase budget at fc: pole -75.9 deg, dead time -8.1 deg,
+  measurement filter -9.5 deg
+Required PI phase at fc: PM - 180 - phase(PH) = -26.5 deg
+  atan(fc/fz) = 63.5 deg  ->  fz = 1.25 Hz
+Unity gain at fc:
+  Kp = 1/(|PH| sqrt(1+(fz/fc)^2)) = 0.0446 V/(rad/s)
+  Ki = 2 pi fz Kp = 0.3493 V/(rad/s)/s
+
+Verification (dense grid): fc = 2.50 Hz, PM = 60.0 deg, GM = 18.1 dB
+
+Robustness sweep (gains fixed, plant perturbed +/-30%):
+  case                   fc         PM         GM      
+  K -30% (hot winding)    1.85 Hz    61.7 deg  21.2 dB
+  K +30%                  3.14 Hz    57.6 deg  15.8 dB
+  tau -30%                3.36 Hz    61.0 deg  15.2 dB
+  tau +30% (payload)      2.03 Hz    57.5 deg  20.2 dB
+  K-30% tau+30%           1.54 Hz    57.5 deg  23.3 dB
+  K+30% tau-30%           4.26 Hz    55.9 deg  12.9 dB
+Worst case keeps > 45 deg: the loop tolerates the whole realistic
+parameter envelope without retuning.
+
+Firmware-exact discrete simulation (sat 0..5.0 V, encoder
+quantization, 15 Hz LPF, back-calculation anti-windup Tt=Kp/Ki):
+  reference step 0 -> 300 rad/s:
+    rise time (10-90%)      = 250 ms
+    overshoot               = 5.6 %  (anti-windup ON)
+    overshoot               = 30.6 %  (anti-windup OFF -- the
+      command saturates at Vbus for ~0.3 s during spin-up and a
+      naive integrator winds up; this is why the firmware has AW)
+  disturbance -0.75 V at t=3.0 s ('hill'):
+    speed dip               = 11.8 rad/s (3.9 %)
+    recovery to 2%          = 0.19 s
+
+Firmware constants (transcribe into firmware/motor_speed_pi):
+  #define KP          0.0446f   // V per rad/s
+  #define KI          0.3493f   // V per rad/s per s
+  #define TS          0.010f   // s (100 Hz loop)
+  #define F_MEAS_LPF  15.0f    // Hz -> alpha = 0.6103
+  #define VBUS        5.00f   // V, Project 1 buck output
+  anti-windup: Tt = Kp/Ki = 0.128 s (back-calculation)
