@@ -65,20 +65,20 @@ before real data exists.
 | Step 0 → 300 rad/s | 250 ms rise, 5.6 % overshoot (31 % without anti-windup — command rails at 5 V for 0.3 s) |
 | "Hill" disturbance (−0.75 V ≈ +2.8 mN·m) | 3.9 % dip, recovered in 0.19 s |
 
-### Measured plant parameters (fill in after the bench run)
+### Measured plant parameters (synthetic-data run)
 
-| Parameter | Synthetic run | **Real bench** |
-|---|---|---|
-| K [rad/s per V] | 83.7 ± 0.1 | *TBD* |
-| τ [ms] | 254 ± 3 | *TBD* |
-| θ [ms] | 9 ± 2 | *TBD* |
-| fit [%] | 90.7 | *TBD* |
-| → Kp, Ki | 0.0446, 0.349 | *TBD (re-run pi_design.py)* |
+| Parameter | Value |
+|---|---|
+| K [rad/s per V] | 83.7 ± 0.1 |
+| τ [ms] | 254 ± 3 |
+| θ [ms] | 9 ± 2 |
+| fit [%] | 90.7 |
+| → Kp, Ki | 0.0446, 0.349 |
 
-Procedure: `firmware/README.md` §"Collecting real step-response data" —
-the firmware's `i` command streams a CSV in exactly the format
-`fit_plant.py --csv` eats; the design pipeline then regenerates gains and
-this table.
+The firmware's `i` command streams a real step-response CSV in exactly the
+format `system-id/fit_plant.py --csv` consumes, so the same pipeline
+regenerates this table directly from bench data once a real motor/load is
+wired up — see `firmware/README.md`.
 
 ## The EV analogy, made explicit
 

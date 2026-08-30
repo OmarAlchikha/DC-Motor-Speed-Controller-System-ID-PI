@@ -43,17 +43,13 @@ encoder GND ── Mega GND            out of the sensor supply)
 
 ## Collecting real step-response data
 
-1. Motor coupled to its real load (the flywheel/wheel it will drive —
-   identifying the bare motor gives you the wrong τ).
-2. `i`, capture the stream to a file:
-   `pio device monitor -b 115200 | tee bench.csv` or your serial
-   terminal's log function. The two `#`/header lines are part of the
-   format — keep them.
-3. `python3 system-id/fit_plant.py --csv bench.csv`
-4. `python3 control-design/pi_design.py`
-5. Transcribe the new `#define` block from `design_report.txt` into the
-   sketch, reflash, `s300`.
-
-The staircase in the sketch is byte-identical to the synthetic
-generator's, so the fitted synthetic vs bench parameters are directly
-comparable — the difference *is* your model error.
+The `i` command runs the same staircase as the synthetic generator and
+streams a CSV in the exact format `system-id/fit_plant.py --csv` consumes
+(capture it with `pio device monitor -b 115200 | tee bench.csv` or any
+serial logger — keep the `#`/header lines, they're part of the format).
+Re-running `fit_plant.py` and `pi_design.py` on that file regenerates the
+identified plant and gains directly from bench data, and transcribing the
+resulting `#define` block back into this sketch closes the loop. Because
+the staircase is byte-identical to the synthetic one, the fitted synthetic
+vs. bench parameters are directly comparable — the difference *is* the
+model error.
